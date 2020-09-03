@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,7 +22,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <algorithm> // For std::min
 #include <cassert>
 #include <cstring>   // For std::memset
 
@@ -35,12 +38,17 @@ namespace {
     {
     //            OUR PIECES
     // pair pawn knight bishop rook queen
-    {1667                               }, // Bishop pair
-    {  40,    0                         }, // Pawn
-    {  32,  255,  -3                    }, // Knight      OUR PIECES
+    {1438                               }, // Bishop pair
+    {  40,   38                         }, // Pawn
+    {  32,  255, -62                    }, // Knight      OUR PIECES
     {   0,  104,   4,    0              }, // Bishop
+<<<<<<< HEAD
     { -26,   -2,  47,   105,  -149      }, // Rook
     {-189,   24, 117,   133,  -134, -10 }  // Queen
+=======
+    { -26,   -2,  47,   105,  -208      }, // Rook
+    {-189,   24, 117,   133,  -134, -6  }  // Queen
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
     },
 #ifdef ANTI
     {
@@ -195,12 +203,21 @@ namespace {
     {
     //           THEIR PIECES
     // pair pawn knight bishop rook queen
+<<<<<<< HEAD
     {   0                               }, // Bishop pair
     {  36,    0                         }, // Pawn
     {   9,   63,   0                    }, // Knight      OUR PIECES
     {  59,   65,  42,     0             }, // Bishop
     {  46,   39,  24,   -24,    0       }, // Rook
     {  97,  100, -42,   137,  268,    0 }  // Queen
+=======
+    {                                   }, // Bishop pair
+    {  36,                              }, // Pawn
+    {   9,   63,                        }, // Knight      OUR PIECES
+    {  59,   65,  42,                   }, // Bishop
+    {  46,   39,  24,   -24,            }, // Rook
+    {  97,  100, -42,   137,  268,      }  // Queen
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
     },
 #ifdef ANTI
     {
@@ -357,6 +374,9 @@ namespace {
 #ifdef ATOMIC
   Endgame<ATOMIC_VARIANT, KXK> EvaluateAtomicKXK[] = { Endgame<ATOMIC_VARIANT, KXK>(WHITE), Endgame<ATOMIC_VARIANT, KXK>(BLACK) };
 #endif
+#ifdef HELPMATE
+  Endgame<HELPMATE_VARIANT, KXK> EvaluateHelpmateKXK[] = { Endgame<HELPMATE_VARIANT, KXK>(WHITE), Endgame<HELPMATE_VARIANT, KXK>(BLACK) };
+#endif
 
   Endgame<CHESS_VARIANT, KBPsK>  ScaleKBPsK[]  = { Endgame<CHESS_VARIANT, KBPsK>(WHITE),  Endgame<CHESS_VARIANT, KBPsK>(BLACK) };
   Endgame<CHESS_VARIANT, KQKRPs> ScaleKQKRPs[] = { Endgame<CHESS_VARIANT, KQKRPs>(WHITE), Endgame<CHESS_VARIANT, KQKRPs>(BLACK) };
@@ -376,22 +396,32 @@ namespace {
   }
 #endif
 
+<<<<<<< HEAD
+=======
+#ifdef HELPMATE
+  bool is_KXK_helpmate(const Position& pos, Color us) {
+    return   more_than_one(pos.pieces(us))
+          && pos.non_pawn_material() >= RookValueMg;
+  }
+#endif
+
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   bool is_KBPsK(const Position& pos, Color us) {
     return   pos.non_pawn_material(us) == BishopValueMg
-          && pos.count<BISHOP>(us) == 1
           && pos.count<PAWN  >(us) >= 1;
   }
 
   bool is_KQKRPs(const Position& pos, Color us) {
     return  !pos.count<PAWN>(us)
           && pos.non_pawn_material(us) == QueenValueMg
-          && pos.count<QUEEN>(us)  == 1
           && pos.count<ROOK>(~us) == 1
           && pos.count<PAWN>(~us) >= 1;
   }
 
+
   /// imbalance() calculates the imbalance by comparing the piece count of each
   /// piece type for both colors.
+
   template<Color Us>
 #ifdef CRAZYHOUSE
   int imbalance(const Position& pos, const int pieceCount[][PIECE_TYPE_NB],
@@ -400,7 +430,11 @@ namespace {
   int imbalance(const Position& pos, const int pieceCount[][PIECE_TYPE_NB]) {
 #endif
 
+<<<<<<< HEAD
     constexpr Color Them = (Us == WHITE ? BLACK : WHITE);
+=======
+    constexpr Color Them = ~Us;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
     int bonus = 0;
 
@@ -422,9 +456,9 @@ namespace {
         if (!pieceCount[Us][pt1])
             continue;
 
-        int v = 0;
+        int v = QuadraticOurs[pos.variant()][pt1][pt1] * pieceCount[Us][pt1];
 
-        for (int pt2 = NO_PIECE_TYPE; pt2 <= pt1; ++pt2)
+        for (int pt2 = NO_PIECE_TYPE; pt2 < pt1; ++pt2)
             v +=  QuadraticOurs[pos.variant()][pt1][pt2] * pieceCount[Us][pt2]
                 + QuadraticTheirs[pos.variant()][pt1][pt2] * pieceCount[Them][pt2];
 
@@ -454,6 +488,7 @@ namespace {
 
 namespace Material {
 
+
 /// Material::probe() looks up the current position's material configuration in
 /// the material hash table. It returns a pointer to the Entry if the position
 /// is found. Otherwise a new Entry is computed and stored there, so we don't
@@ -473,7 +508,11 @@ Entry* probe(const Position& pos) {
 
   Value npm_w = pos.non_pawn_material(WHITE);
   Value npm_b = pos.non_pawn_material(BLACK);
+<<<<<<< HEAD
   Value npm = std::max(EndgameLimit, std::min(npm_w + npm_b, MidgameLimit));
+=======
+  Value npm   = std::clamp(npm_w + npm_b, EndgameLimit, MidgameLimit);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef ANTI
   if (pos.is_anti())
       npm = 2 * std::min(npm_w, npm_b);
@@ -489,46 +528,74 @@ Entry* probe(const Position& pos) {
   // Let's look if we have a specialized evaluation function for this particular
   // material configuration. Firstly we look for a fixed configuration one, then
   // for a generic one if the previous search failed.
-  if ((e->evaluationFunction = pos.this_thread()->endgames.probe<Value>(key)) != nullptr)
+  if ((e->evaluationFunction = Endgames::probe<Value>(key)) != nullptr)
       return e;
 
-  if (pos.variant() == CHESS_VARIANT)
+  switch (pos.subvariant())
   {
-  for (Color c = WHITE; c <= BLACK; ++c)
-      if (is_KXK(pos, c))
-      {
-          e->evaluationFunction = &EvaluateKXK[c];
-          return e;
-      }
-  }
 #ifdef ATOMIC
-  else if (pos.is_atomic())
-  {
-      for (Color c = WHITE; c <= BLACK; ++c)
+  case ATOMIC_VARIANT:
+      for (Color c : { WHITE, BLACK })
           if (is_KXK_atomic(pos, c))
           {
               e->evaluationFunction = &EvaluateAtomicKXK[c];
               return e;
           }
-  }
+  break;
 #endif
+#ifdef ANTIHELPMATE
+  case ANTIHELPMATE_VARIANT:
+  /* fall-through */
+#endif
+#ifdef HELPMATE
+  case HELPMATE_VARIANT:
+  {
+      Color c = WHITE;
+#ifdef ANTIHELPMATE
+      c = pos.is_antihelpmate() ? BLACK : WHITE;
+#endif
+      if (is_KXK_helpmate(pos, c))
+      {
+          e->evaluationFunction = &EvaluateHelpmateKXK[c];
+          return e;
+      }
+  }
+  break;
+#endif
+  case CHESS_VARIANT:
+  for (Color c : { WHITE, BLACK })
+      if (is_KXK(pos, c))
+      {
+          e->evaluationFunction = &EvaluateKXK[c];
+          return e;
+      }
+  break;
+  default: break;
+  }
 
   // OK, we didn't find any special evaluation function for the current material
   // configuration. Is there a suitable specialized scaling function?
-  EndgameBase<ScaleFactor>* sf;
+  const auto* sf = Endgames::probe<ScaleFactor>(key);
 
-  if ((sf = pos.this_thread()->endgames.probe<ScaleFactor>(key)) != nullptr)
+  if (sf)
   {
       e->scalingFunction[sf->strongSide] = sf; // Only strong color assigned
       return e;
   }
 
-  if (pos.variant() == CHESS_VARIANT)
+  switch (pos.variant())
   {
+#ifdef GRID
+  case GRID_VARIANT:
+      if (npm_w <= RookValueMg && npm_b <= RookValueMg)
+          e->factor[WHITE] = e->factor[BLACK] = 10;
+  break;
+#endif
+  case CHESS_VARIANT:
   // We didn't find any specialized scaling function, so fall back on generic
   // ones that refer to more than one material distribution. Note that in this
   // case we don't return after setting the function.
-  for (Color c = WHITE; c <= BLACK; ++c)
+  for (Color c : { WHITE, BLACK })
   {
     if (is_KBPsK(pos, c))
         e->scalingFunction[c] = &ScaleKBPsK[c];
@@ -541,13 +608,13 @@ Entry* probe(const Position& pos) {
   {
       if (!pos.count<PAWN>(BLACK))
       {
-          assert(pos.variant() != CHESS_VARIANT || pos.count<PAWN>(WHITE) >= 2);
+          assert(pos.count<PAWN>(WHITE) >= 2);
 
           e->scalingFunction[WHITE] = &ScaleKPsK[WHITE];
       }
       else if (!pos.count<PAWN>(WHITE))
       {
-          assert(pos.variant() != CHESS_VARIANT || pos.count<PAWN>(BLACK) >= 2);
+          assert(pos.count<PAWN>(BLACK) >= 2);
 
           e->scalingFunction[BLACK] = &ScaleKPsK[BLACK];
       }
@@ -559,6 +626,8 @@ Entry* probe(const Position& pos) {
           e->scalingFunction[BLACK] = &ScaleKPKP[BLACK];
       }
   }
+  /* fall-through */
+  default:
 
   // Zero or just one pawn makes it difficult to win, even with a small material
   // advantage. This catches some trivial draws like KK, KBK and KNK and gives a

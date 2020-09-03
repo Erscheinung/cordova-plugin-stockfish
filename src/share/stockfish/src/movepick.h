@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,6 +40,7 @@
 template<typename T, int D>
 class StatsEntry {
 
+<<<<<<< HEAD
   static const bool IsInt = std::is_integral<T>::value;
   typedef typename std::conditional<IsInt, int, T>::type TT;
 
@@ -80,10 +85,58 @@ struct Stats<T, D, Size> : public std::array<StatsEntry<T, D>, Size> {
 /// In stats table, D=0 means that the template parameter is not used
 enum StatsParams { NOT_USED = 0 };
 
+=======
+  T entry;
+
+public:
+  void operator=(const T& v) { entry = v; }
+  T* operator&() { return &entry; }
+  T* operator->() { return &entry; }
+  operator const T&() const { return entry; }
+
+  void operator<<(int bonus) {
+    assert(abs(bonus) <= D); // Ensure range is [-D, D]
+    static_assert(D <= std::numeric_limits<T>::max(), "D overflows T");
+
+    entry += bonus - entry * abs(bonus) / D;
+
+    assert(abs(entry) <= D);
+  }
+};
+
+/// Stats is a generic N-dimensional array used to store various statistics.
+/// The first template parameter T is the base type of the array, the second
+/// template parameter D limits the range of updates in [-D, D] when we update
+/// values with the << operator, while the last parameters (Size and Sizes)
+/// encode the dimensions of the array.
+template <typename T, int D, int Size, int... Sizes>
+struct Stats : public std::array<Stats<T, D, Sizes...>, Size>
+{
+  typedef Stats<T, D, Size, Sizes...> stats;
+
+  void fill(const T& v) {
+
+    // For standard-layout 'this' points to first struct member
+    assert(std::is_standard_layout<stats>::value);
+
+    typedef StatsEntry<T, D> entry;
+    entry* p = reinterpret_cast<entry*>(this);
+    std::fill(p, p + sizeof(*this) / sizeof(entry), v);
+  }
+};
+
+template <typename T, int D, int Size>
+struct Stats<T, D, Size> : public std::array<StatsEntry<T, D>, Size> {};
+
+/// In stats table, D=0 means that the template parameter is not used
+enum StatsParams { NOT_USED = 0 };
+enum StatsType { NoCaptures, Captures };
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 /// ButterflyHistory records how often quiet moves have been successful or
 /// unsuccessful during the current search, and is used for reduction and move
 /// ordering decisions. It uses 2 tables (one for each color) indexed by
+<<<<<<< HEAD
 /// the move's from and to squares, see chessprogramming.wikispaces.com/Butterfly+Boards
 #ifdef CRAZYHOUSE
 typedef Stats<int16_t, 10368, COLOR_NB, int(SQUARE_NB + 1) * int(SQUARE_NB)> ButterflyHistory;
@@ -101,6 +154,27 @@ typedef Stats<int16_t, 10368, PIECE_NB, SQUARE_NB, PIECE_TYPE_NB> CapturePieceTo
 /// PieceToHistory is like ButterflyHistory but is addressed by a move's [piece][to]
 typedef Stats<int16_t, 29952, PIECE_NB, SQUARE_NB> PieceToHistory;
 
+=======
+/// the move's from and to squares, see www.chessprogramming.org/Butterfly_Boards
+typedef Stats<int16_t, 10692, COLOR_NB, int(SQUARE_NB) * int(SQUARE_NB)> ButterflyHistory;
+
+/// At higher depths LowPlyHistory records successful quiet moves near the root
+/// and quiet moves which are/were in the PV (ttPv). It is cleared with each new
+/// search and filled during iterative deepening.
+constexpr int MAX_LPH = 4;
+typedef Stats<int16_t, 10692, MAX_LPH, int(SQUARE_NB) * int(SQUARE_NB)> LowPlyHistory;
+
+/// CounterMoveHistory stores counter moves indexed by [piece][to] of the previous
+/// move, see www.chessprogramming.org/Countermove_Heuristic
+typedef Stats<Move, NOT_USED, PIECE_NB, SQUARE_NB> CounterMoveHistory;
+
+/// CapturePieceToHistory is addressed by a move's [piece][to][captured piece type]
+typedef Stats<int16_t, 10692, PIECE_NB, SQUARE_NB, PIECE_TYPE_NB> CapturePieceToHistory;
+
+/// PieceToHistory is like ButterflyHistory but is addressed by a move's [piece][to]
+typedef Stats<int16_t, 29952, PIECE_NB, SQUARE_NB> PieceToHistory;
+
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 /// ContinuationHistory is the combined history of a given pair of moves, usually
 /// the current one given a previous one. The nested history table is based on
 /// PieceToHistory instead of ButterflyBoards.
@@ -123,12 +197,24 @@ public:
   MovePicker(const Position&, Move, Value, const CapturePieceToHistory*);
   MovePicker(const Position&, Move, Depth, const ButterflyHistory*,
                                            const CapturePieceToHistory*,
+<<<<<<< HEAD
                                            Square);
   MovePicker(const Position&, Move, Depth, const ButterflyHistory*,
                                            const CapturePieceToHistory*,
                                            const PieceToHistory**,
                                            Move,
                                            Move*);
+=======
+                                           const PieceToHistory**,
+                                           Square);
+  MovePicker(const Position&, Move, Depth, const ButterflyHistory*,
+                                           const LowPlyHistory*,
+                                           const CapturePieceToHistory*,
+                                           const PieceToHistory**,
+                                           Move,
+                                           const Move*,
+                                           int);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   Move next_move(bool skipQuiets = false);
 
 private:
@@ -139,6 +225,7 @@ private:
 
   const Position& pos;
   const ButterflyHistory* mainHistory;
+<<<<<<< HEAD
   const CapturePieceToHistory* captureHistory;
   const PieceToHistory** contHistory;
   Move ttMove;
@@ -148,6 +235,18 @@ private:
   Square recaptureSquare;
   Value threshold;
   Depth depth;
+=======
+  const LowPlyHistory* lowPlyHistory;
+  const CapturePieceToHistory* captureHistory;
+  const PieceToHistory** continuationHistory;
+  Move ttMove;
+  ExtMove refutations[3], *cur, *endMoves, *endBadCaptures;
+  int stage;
+  Square recaptureSquare;
+  Value threshold;
+  Depth depth;
+  int ply;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   ExtMove moves[MAX_MOVES];
 };
 

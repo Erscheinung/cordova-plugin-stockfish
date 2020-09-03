@@ -1,7 +1,11 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (c) 2013 Ronald de Man
   Copyright (C) 2016-2018 Marco Costalba, Lucas Braesch
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

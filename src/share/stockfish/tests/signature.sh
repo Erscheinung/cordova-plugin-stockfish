@@ -16,7 +16,11 @@ signature=`./stockfish bench all &>/dev/null && ./stockfish bench 2>&1 | grep "N
 if [ $# -gt 0 ]; then
    # compare to given reference
    if [ "$1" != "$signature" ]; then
+<<<<<<< HEAD
       if [ "x$1" == "x" ]; then
+=======
+      if [ -z "$signature" ]; then
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
          echo "No signature obtained from bench. Code crashed or assert triggered ?"
       else
          echo "signature mismatch: reference $1 obtained: $signature ."

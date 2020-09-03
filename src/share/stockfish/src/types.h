@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -40,9 +44,9 @@
 
 #include <cassert>
 #include <cctype>
-#include <climits>
 #include <cstdint>
 #include <cstdlib>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -107,7 +111,11 @@ constexpr int MAX_MOVES = 512;
 #else
 constexpr int MAX_MOVES = 256;
 #endif
+<<<<<<< HEAD
 constexpr int MAX_PLY   = 128;
+=======
+constexpr int MAX_PLY   = 246;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 enum Variant {
   //main variants
@@ -148,6 +156,15 @@ enum Variant {
   VARIANT_NB,
   LAST_VARIANT = VARIANT_NB - 1,
   //subvariants
+#ifdef ANTIHELPMATE
+  ANTIHELPMATE_VARIANT,
+#endif
+#ifdef HELPMATE
+  HELPMATE_VARIANT,
+#endif
+#ifdef GIVEAWAY
+  GIVEAWAY_VARIANT,
+#endif
 #ifdef SUICIDE
   SUICIDE_VARIANT,
 #endif
@@ -160,6 +177,18 @@ enum Variant {
 #ifdef LOOP
   LOOP_VARIANT,
 #endif
+<<<<<<< HEAD
+=======
+#ifdef PLACEMENT
+  PLACEMENT_VARIANT,
+#endif
+#ifdef KNIGHTRELAY
+  KNIGHTRELAY_VARIANT,
+#endif
+#ifdef RELAY
+  RELAY_VARIANT,
+#endif
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef SLIPPEDGRID
   SLIPPEDGRID_VARIANT,
 #endif
@@ -174,7 +203,7 @@ static std::vector<std::string> variants = {
 //main variants
 "chess",
 #ifdef ANTI
-"giveaway",
+"antichess",
 #endif
 #ifdef ATOMIC
 "atomic",
@@ -207,6 +236,15 @@ static std::vector<std::string> variants = {
 "twokings",
 #endif
 //subvariants
+#ifdef ANTIHELPMATE
+"antihelpmate",
+#endif
+#ifdef HELPMATE
+"helpmate",
+#endif
+#ifdef GIVEAWAY
+"giveaway",
+#endif
 #ifdef SUICIDE
 "suicide",
 #endif
@@ -219,6 +257,18 @@ static std::vector<std::string> variants = {
 #ifdef LOOP
 "loop",
 #endif
+<<<<<<< HEAD
+=======
+#ifdef PLACEMENT
+"placement",
+#endif
+#ifdef KNIGHTRELAY
+"knightrelay",
+#endif
+#ifdef RELAY
+"relay",
+#endif
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef SLIPPEDGRID
 "slippedgrid",
 #endif
@@ -263,27 +313,50 @@ enum MoveType {
 
 enum Color {
   WHITE, BLACK, COLOR_NB = 2
+<<<<<<< HEAD
 };
 
 enum CastlingSide {
   KING_SIDE, QUEEN_SIDE, CASTLING_SIDE_NB = 2
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 };
 
-enum CastlingRight {
+enum CastlingRights {
   NO_CASTLING,
   WHITE_OO,
   WHITE_OOO = WHITE_OO << 1,
   BLACK_OO  = WHITE_OO << 2,
   BLACK_OOO = WHITE_OO << 3,
-  ANY_CASTLING = WHITE_OO | WHITE_OOO | BLACK_OO | BLACK_OOO,
+
+  KING_SIDE      = WHITE_OO  | BLACK_OO,
+  QUEEN_SIDE     = WHITE_OOO | BLACK_OOO,
+  WHITE_CASTLING = WHITE_OO  | WHITE_OOO,
+  BLACK_CASTLING = BLACK_OO  | BLACK_OOO,
+  ANY_CASTLING   = WHITE_CASTLING | BLACK_CASTLING,
+
   CASTLING_RIGHT_NB = 16
 };
 
+<<<<<<< HEAD
 template<Color C, CastlingSide S> struct MakeCastling {
   static constexpr CastlingRight
   right = C == WHITE ? S == QUEEN_SIDE ? WHITE_OOO : WHITE_OO
                      : S == QUEEN_SIDE ? BLACK_OOO : BLACK_OO;
+=======
+#ifdef GRID
+enum GridLayout {
+  NORMAL_GRID,
+#ifdef DISPLACEDGRID
+  DISPLACED_GRID,
+#endif
+#ifdef SLIPPEDGRID
+  SLIPPED_GRID,
+#endif
+  GRIDLAYOUT_NB
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 };
+#endif
 
 #ifdef GRID
 enum GridLayout {
@@ -332,14 +405,24 @@ enum Value : int {
   VALUE_INFINITE  = 32001,
   VALUE_NONE      = 32002,
 
-  VALUE_MATE_IN_MAX_PLY  =  VALUE_MATE - 2 * MAX_PLY,
-  VALUE_MATED_IN_MAX_PLY = -VALUE_MATE + 2 * MAX_PLY,
+  VALUE_TB_WIN_IN_MAX_PLY  =  VALUE_MATE - 2 * MAX_PLY,
+  VALUE_TB_LOSS_IN_MAX_PLY = -VALUE_TB_WIN_IN_MAX_PLY,
+  VALUE_MATE_IN_MAX_PLY  =  VALUE_MATE - MAX_PLY,
+  VALUE_MATED_IN_MAX_PLY = -VALUE_MATE_IN_MAX_PLY,
 
+<<<<<<< HEAD
   PawnValueMg   = 171,   PawnValueEg   = 240,
   KnightValueMg = 764,   KnightValueEg = 848,
   BishopValueMg = 826,   BishopValueEg = 891,
   RookValueMg   = 1282,  RookValueEg   = 1373,
   QueenValueMg  = 2500,  QueenValueEg  = 2670,
+=======
+  PawnValueMg   = 126,   PawnValueEg   = 208,
+  KnightValueMg = 781,   KnightValueEg = 854,
+  BishopValueMg = 825,   BishopValueEg = 915,
+  RookValueMg   = 1276,  RookValueEg   = 1380,
+  QueenValueMg  = 2538,  QueenValueEg  = 2682,
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef ANTI
   PawnValueMgAnti   = -108,  PawnValueEgAnti   = -165,
   KnightValueMgAnti = -155,  KnightValueEgAnti = 194,
@@ -420,6 +503,10 @@ enum Value : int {
   QueenValueMgTwoKings  = 2455,  QueenValueEgTwoKings  = 2846,
   KingValueMgTwoKings   = 554,   KingValueEgTwoKings   = 806,
 #endif
+<<<<<<< HEAD
+=======
+  Tempo = 28,
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   MidgameLimit  = 15258, EndgameLimit  = 3915
 };
@@ -437,23 +524,124 @@ enum Piece {
   PIECE_NB = 16
 };
 
+<<<<<<< HEAD
 extern Value PieceValue[VARIANT_NB][PHASE_NB][PIECE_NB];
+=======
+constexpr Value PieceValue[VARIANT_NB][PHASE_NB][PIECE_NB] = {
+{
+  { VALUE_ZERO, PawnValueMg, KnightValueMg, BishopValueMg, RookValueMg, QueenValueMg, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueMg, KnightValueMg, BishopValueMg, RookValueMg, QueenValueMg, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueEg, KnightValueEg, BishopValueEg, RookValueEg, QueenValueEg, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEg, KnightValueEg, BishopValueEg, RookValueEg, QueenValueEg, VALUE_ZERO, VALUE_ZERO }
+},
+#ifdef ANTI
+{
+  { VALUE_ZERO, PawnValueMgAnti, KnightValueMgAnti, BishopValueMgAnti, RookValueMgAnti, QueenValueMgAnti, KingValueMgAnti, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgAnti, KnightValueEgAnti, BishopValueEgAnti, RookValueEgAnti, QueenValueEgAnti, KingValueEgAnti, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgAnti, KnightValueMgAnti, BishopValueMgAnti, RookValueMgAnti, QueenValueMgAnti, KingValueMgAnti, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgAnti, KnightValueEgAnti, BishopValueEgAnti, RookValueEgAnti, QueenValueEgAnti, KingValueEgAnti, VALUE_ZERO }
+},
+#endif
+#ifdef ATOMIC
+{
+  { VALUE_ZERO, PawnValueMgAtomic, KnightValueMgAtomic, BishopValueMgAtomic, RookValueMgAtomic, QueenValueMgAtomic, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgAtomic, KnightValueEgAtomic, BishopValueEgAtomic, RookValueEgAtomic, QueenValueEgAtomic, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgAtomic, KnightValueMgAtomic, BishopValueMgAtomic, RookValueMgAtomic, QueenValueMgAtomic, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgAtomic, KnightValueEgAtomic, BishopValueEgAtomic, RookValueEgAtomic, QueenValueEgAtomic, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef CRAZYHOUSE
+{
+  { VALUE_ZERO, PawnValueMgHouse, KnightValueMgHouse, BishopValueMgHouse, RookValueMgHouse, QueenValueMgHouse, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHouse, KnightValueEgHouse, BishopValueEgHouse, RookValueEgHouse, QueenValueEgHouse, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgHouse, KnightValueMgHouse, BishopValueMgHouse, RookValueMgHouse, QueenValueMgHouse, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHouse, KnightValueEgHouse, BishopValueEgHouse, RookValueEgHouse, QueenValueEgHouse, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef EXTINCTION
+{
+  { VALUE_ZERO, PawnValueMgExtinction, KnightValueMgExtinction, BishopValueMgExtinction, RookValueMgExtinction, QueenValueMgExtinction, KingValueMgExtinction, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgExtinction, KnightValueEgExtinction, BishopValueEgExtinction, RookValueEgExtinction, QueenValueEgExtinction, KingValueEgExtinction, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgExtinction, KnightValueMgExtinction, BishopValueMgExtinction, RookValueMgExtinction, QueenValueMgExtinction, KingValueMgExtinction, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgExtinction, KnightValueEgExtinction, BishopValueEgExtinction, RookValueEgExtinction, QueenValueEgExtinction, KingValueEgExtinction, VALUE_ZERO }
+},
+#endif
+#ifdef GRID
+{
+  { VALUE_ZERO, PawnValueMgGrid, KnightValueMgGrid, BishopValueMgGrid, RookValueMgGrid, QueenValueMgGrid, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgGrid, KnightValueEgGrid, BishopValueEgGrid, RookValueEgGrid, QueenValueEgGrid, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgGrid, KnightValueMgGrid, BishopValueMgGrid, RookValueMgGrid, QueenValueMgGrid, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgGrid, KnightValueEgGrid, BishopValueEgGrid, RookValueEgGrid, QueenValueEgGrid, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef HORDE
+{
+  { VALUE_ZERO, PawnValueMgHorde, KnightValueMgHorde, BishopValueMgHorde, RookValueMgHorde, QueenValueMgHorde, KingValueMgHorde, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHorde, KnightValueEgHorde, BishopValueEgHorde, RookValueEgHorde, QueenValueEgHorde, KingValueEgHorde, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgHorde, KnightValueMgHorde, BishopValueMgHorde, RookValueMgHorde, QueenValueMgHorde, KingValueMgHorde, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHorde, KnightValueEgHorde, BishopValueEgHorde, RookValueEgHorde, QueenValueEgHorde, KingValueEgHorde, VALUE_ZERO }
+},
+#endif
+#ifdef KOTH
+{
+  { VALUE_ZERO, PawnValueMgHill, KnightValueMgHill, BishopValueMgHill, RookValueMgHill, QueenValueMgHill, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHill, KnightValueEgHill, BishopValueEgHill, RookValueEgHill, QueenValueEgHill, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgHill, KnightValueMgHill, BishopValueMgHill, RookValueMgHill, QueenValueMgHill, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgHill, KnightValueEgHill, BishopValueEgHill, RookValueEgHill, QueenValueEgHill, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef LOSERS
+{
+  { VALUE_ZERO, PawnValueMgLosers, KnightValueMgLosers, BishopValueMgLosers, RookValueMgLosers, QueenValueMgLosers, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgLosers, KnightValueEgLosers, BishopValueEgLosers, RookValueEgLosers, QueenValueEgLosers, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgLosers, KnightValueMgLosers, BishopValueMgLosers, RookValueMgLosers, QueenValueMgLosers, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgLosers, KnightValueEgLosers, BishopValueEgLosers, RookValueEgLosers, QueenValueEgLosers, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef RACE
+{
+  { VALUE_ZERO, VALUE_ZERO, KnightValueMgRace, BishopValueMgRace, RookValueMgRace, QueenValueMgRace, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, VALUE_ZERO, KnightValueEgRace, BishopValueEgRace, RookValueEgRace, QueenValueEgRace, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, VALUE_ZERO, KnightValueMgRace, BishopValueMgRace, RookValueMgRace, QueenValueMgRace, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, VALUE_ZERO, KnightValueEgRace, BishopValueEgRace, RookValueEgRace, QueenValueEgRace, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef THREECHECK
+{
+  { VALUE_ZERO, PawnValueMgThreeCheck, KnightValueMgThreeCheck, BishopValueMgThreeCheck, RookValueMgThreeCheck, QueenValueMgThreeCheck, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgThreeCheck, KnightValueEgThreeCheck, BishopValueEgThreeCheck, RookValueEgThreeCheck, QueenValueEgThreeCheck, VALUE_ZERO, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgThreeCheck, KnightValueMgThreeCheck, BishopValueMgThreeCheck, RookValueMgThreeCheck, QueenValueMgThreeCheck, VALUE_ZERO, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgThreeCheck, KnightValueEgThreeCheck, BishopValueEgThreeCheck, RookValueEgThreeCheck, QueenValueEgThreeCheck, VALUE_ZERO, VALUE_ZERO }
+},
+#endif
+#ifdef TWOKINGS
+{
+  { VALUE_ZERO, PawnValueMgTwoKings, KnightValueMgTwoKings, BishopValueMgTwoKings, RookValueMgTwoKings, QueenValueMgTwoKings, KingValueMgTwoKings, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgTwoKings, KnightValueEgTwoKings, BishopValueEgTwoKings, RookValueEgTwoKings, QueenValueEgTwoKings, KingValueEgTwoKings, VALUE_ZERO },
+  { VALUE_ZERO, PawnValueMgTwoKings, KnightValueMgTwoKings, BishopValueMgTwoKings, RookValueMgTwoKings, QueenValueMgTwoKings, KingValueMgTwoKings, VALUE_ZERO,
+    VALUE_ZERO, PawnValueEgTwoKings, KnightValueEgTwoKings, BishopValueEgTwoKings, RookValueEgTwoKings, QueenValueEgTwoKings, KingValueEgTwoKings, VALUE_ZERO }
+},
+#endif
+};
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
-enum Depth : int {
+typedef int Depth;
 
-  ONE_PLY = 1,
+enum : int {
+  DEPTH_QS_CHECKS     =  0,
+  DEPTH_QS_NO_CHECKS  = -1,
+  DEPTH_QS_RECAPTURES = -5,
 
-  DEPTH_ZERO          =  0 * ONE_PLY,
-  DEPTH_QS_CHECKS     =  0 * ONE_PLY,
-  DEPTH_QS_NO_CHECKS  = -1 * ONE_PLY,
-  DEPTH_QS_RECAPTURES = -5 * ONE_PLY,
+  DEPTH_NONE   = -6,
 
-  DEPTH_NONE = -6 * ONE_PLY,
-  DEPTH_MAX  = MAX_PLY * ONE_PLY
+  DEPTH_OFFSET = -7 // value used only for TT entry occupancy check
 };
 
+<<<<<<< HEAD
 static_assert(!(ONE_PLY & (ONE_PLY - 1)), "ONE_PLY is not a power of 2");
 
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 enum Square : int {
   SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1, SQ_G1, SQ_H1,
   SQ_A2, SQ_B2, SQ_C2, SQ_D2, SQ_E2, SQ_F2, SQ_G2, SQ_H2,
@@ -465,7 +653,12 @@ enum Square : int {
   SQ_A8, SQ_B8, SQ_C8, SQ_D8, SQ_E8, SQ_F8, SQ_G8, SQ_H8,
   SQ_NONE,
 
+<<<<<<< HEAD
   SQUARE_NB = 64
+=======
+  SQUARE_ZERO = 0,
+  SQUARE_NB   = 64
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 };
 
 enum Direction : int {
@@ -488,7 +681,25 @@ enum Rank : int {
   RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NB
 };
 
+// Keep track of what a move changes on the board (used by NNUE)
+struct DirtyPiece {
 
+<<<<<<< HEAD
+=======
+  // Number of changed pieces
+  int dirty_num;
+
+  // Max 3 pieces can change in one move. A promotion with capture moves
+  // both the pawn and the captured piece to SQ_NONE and the piece promoted
+  // to from SQ_NONE to the capture square.
+  Piece piece[3];
+
+  // From and to squares, which may be SQ_NONE
+  Square from[3];
+  Square to[3];
+};
+
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 /// Score enum stores a middlegame and an endgame value in a single integer (enum).
 /// The least significant 16 bits are used to store the middlegame value and the
 /// upper 16 bits are used to store the endgame value. We have to take care to
@@ -513,11 +724,19 @@ inline Value mg_value(Score s) {
 }
 
 #define ENABLE_BASE_OPERATORS_ON(T)                                \
+<<<<<<< HEAD
 constexpr T operator+(T d1, T d2) { return T(int(d1) + int(d2)); } \
 constexpr T operator-(T d1, T d2) { return T(int(d1) - int(d2)); } \
 constexpr T operator-(T d) { return T(-int(d)); }                  \
 inline T& operator+=(T& d1, T d2) { return d1 = d1 + d2; }         \
 inline T& operator-=(T& d1, T d2) { return d1 = d1 - d2; }
+=======
+constexpr T operator+(T d1, int d2) { return T(int(d1) + d2); }    \
+constexpr T operator-(T d1, int d2) { return T(int(d1) - d2); }    \
+constexpr T operator-(T d) { return T(-int(d)); }                  \
+inline T& operator+=(T& d1, int d2) { return d1 = d1 + d2; }       \
+inline T& operator-=(T& d1, int d2) { return d1 = d1 - d2; }
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 #define ENABLE_INCR_OPERATORS_ON(T)                                \
 inline T& operator++(T& d) { return d = T(int(d) + 1); }           \
@@ -525,7 +744,10 @@ inline T& operator--(T& d) { return d = T(int(d) - 1); }
 
 #define ENABLE_FULL_OPERATORS_ON(T)                                \
 ENABLE_BASE_OPERATORS_ON(T)                                        \
+<<<<<<< HEAD
 ENABLE_INCR_OPERATORS_ON(T)                                        \
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 constexpr T operator*(int i, T d) { return T(i * int(d)); }        \
 constexpr T operator*(T d, int i) { return T(int(d) * i); }        \
 constexpr T operator/(T d, int i) { return T(int(d) / i); }        \
@@ -533,17 +755,27 @@ constexpr int operator/(T d1, T d2) { return int(d1) / int(d2); }  \
 inline T& operator*=(T& d, int i) { return d = T(int(d) * i); }    \
 inline T& operator/=(T& d, int i) { return d = T(int(d) / i); }
 
-ENABLE_FULL_OPERATORS_ON(Variant)
 ENABLE_FULL_OPERATORS_ON(Value)
+<<<<<<< HEAD
+=======
+ENABLE_FULL_OPERATORS_ON(Direction)
+
+ENABLE_INCR_OPERATORS_ON(Variant)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef THREECHECK
-ENABLE_FULL_OPERATORS_ON(CheckCount)
+ENABLE_INCR_OPERATORS_ON(CheckCount)
 #endif
+<<<<<<< HEAD
 ENABLE_FULL_OPERATORS_ON(Depth)
 ENABLE_FULL_OPERATORS_ON(Direction)
 
 ENABLE_INCR_OPERATORS_ON(PieceType)
 ENABLE_INCR_OPERATORS_ON(Piece)
 ENABLE_INCR_OPERATORS_ON(Color)
+=======
+ENABLE_INCR_OPERATORS_ON(Piece)
+ENABLE_INCR_OPERATORS_ON(PieceType)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 ENABLE_INCR_OPERATORS_ON(Square)
 ENABLE_INCR_OPERATORS_ON(File)
 ENABLE_INCR_OPERATORS_ON(Rank)
@@ -554,11 +786,19 @@ ENABLE_BASE_OPERATORS_ON(Score)
 #undef ENABLE_INCR_OPERATORS_ON
 #undef ENABLE_BASE_OPERATORS_ON
 
+<<<<<<< HEAD
 /// Additional operators to add integers to a Value
 constexpr Value operator+(Value v, int i) { return Value(int(v) + i); }
 constexpr Value operator-(Value v, int i) { return Value(int(v) - i); }
 inline Value& operator+=(Value& v, int i) { return v = v + i; }
 inline Value& operator-=(Value& v, int i) { return v = v - i; }
+=======
+/// Additional operators to add a Direction to a Square
+constexpr Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
+constexpr Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
+inline Square& operator+=(Square& s, Direction d) { return s = s + d; }
+inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 /// Additional operators to add a Direction to a Square
 inline Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
@@ -582,15 +822,24 @@ inline Score operator*(Score s, int i) {
 
   assert(eg_value(result) == (i * eg_value(s)));
   assert(mg_value(result) == (i * mg_value(s)));
-  assert((i == 0) || (result / i) == s );
+  assert((i == 0) || (result / i) == s);
 
   return result;
 }
 
+<<<<<<< HEAD
+=======
+/// Multiplication of a Score by a boolean
+inline Score operator*(Score s, bool b) {
+  return b ? s : SCORE_ZERO;
+}
+
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 constexpr Color operator~(Color c) {
   return Color(c ^ BLACK); // Toggle color
 }
 
+<<<<<<< HEAD
 constexpr Square operator~(Square s) {
   return Square(s ^ SQ_A8); // Vertical flip SQ_A1 -> SQ_A8
 }
@@ -607,6 +856,24 @@ constexpr CastlingRight operator|(Color c, CastlingSide s) {
   return CastlingRight(WHITE_OO << ((s == QUEEN_SIDE) + 2 * c));
 }
 
+=======
+constexpr Square flip_rank(Square s) { // Swap A1 <-> A8
+  return Square(s ^ SQ_A8);
+}
+
+constexpr Square flip_file(Square s) { // Swap A1 <-> H1
+  return Square(s ^ SQ_H1);
+}
+
+constexpr Piece operator~(Piece pc) {
+  return Piece(pc ^ 8); // Swap color of piece B_KNIGHT <-> W_KNIGHT
+}
+
+constexpr CastlingRights operator&(Color c, CastlingRights cr) {
+  return CastlingRights((c == WHITE ? WHITE_CASTLING : BLACK_CASTLING) & cr);
+}
+
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 constexpr Value mate_in(int ply) {
   return VALUE_MATE - ply;
 }
@@ -656,18 +923,25 @@ constexpr Rank relative_rank(Color c, Square s) {
   return relative_rank(c, rank_of(s));
 }
 
+<<<<<<< HEAD
 inline bool opposite_colors(Square s1, Square s2) {
   int s = int(s1) ^ int(s2);
   return ((s >> 3) ^ s) & 1;
 }
 
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 constexpr Direction pawn_push(Color c) {
   return c == WHITE ? NORTH : SOUTH;
 }
 
 #ifdef RACE
 constexpr Square horizontal_flip(Square s) {
+<<<<<<< HEAD
   return Square(s ^ SQ_H1); // Horizontal flip SQ_A1 -> SQ_H1
+=======
+  return Square(s ^ (FILE_NB - 1)); // Horizontal flip SQ_A1 -> SQ_H1
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 }
 #endif
 
@@ -688,7 +962,11 @@ constexpr Square to_sq(Move m) {
 inline int from_to(Move m) {
 #ifdef CRAZYHOUSE
   if (type_of(m) == DROP)
+<<<<<<< HEAD
       return (m & 0x3F) + 0x1000;
+=======
+      return (to_sq(m) << 6) + to_sq(m);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #endif
  return m & 0xFFF;
 }
@@ -718,8 +996,12 @@ inline PieceType promotion_type(Move m) {
   return PieceType(((m >> 12) & 3) + KNIGHT);
 }
 
-inline Move make_move(Square from, Square to) {
+constexpr Move make_move(Square from, Square to) {
   return Move((from << 6) + to);
+}
+
+inline Move reverse_move(Move m) {
+  return make_move(to_sq(m), from_sq(m));
 }
 
 template<MoveType T>
@@ -737,7 +1019,11 @@ constexpr Move make_drop(Square to, Piece pc) {
 }
 
 constexpr Piece dropped_piece(Move m) {
+<<<<<<< HEAD
   return Piece((m >> 6) & 15);
+=======
+  return Piece((m >> 6) & 0x0F);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 }
 #endif
 
@@ -745,11 +1031,28 @@ inline bool is_ok(Move m) {
   return from_sq(m) != to_sq(m); // Catch MOVE_NULL and MOVE_NONE
 }
 
+/// Based on a congruential pseudo random number generator
+constexpr Key make_key(uint64_t seed) {
+  return seed * 6364136223846793005ULL + 1442695040888963407ULL;
+}
+
 inline Variant main_variant(Variant v) {
   if (v < VARIANT_NB)
       return v;
   switch(v)
   {
+#ifdef ANTIHELPMATE
+  case ANTIHELPMATE_VARIANT:
+      return CHESS_VARIANT;
+#endif
+#ifdef HELPMATE
+  case HELPMATE_VARIANT:
+      return CHESS_VARIANT;
+#endif
+#ifdef GIVEAWAY
+  case GIVEAWAY_VARIANT:
+      return ANTI_VARIANT;
+#endif
 #ifdef SUICIDE
   case SUICIDE_VARIANT:
       return ANTI_VARIANT;
@@ -766,6 +1069,21 @@ inline Variant main_variant(Variant v) {
   case LOOP_VARIANT:
       return CRAZYHOUSE_VARIANT;
 #endif
+<<<<<<< HEAD
+=======
+#ifdef PLACEMENT
+  case PLACEMENT_VARIANT:
+      return CRAZYHOUSE_VARIANT;
+#endif
+#ifdef KNIGHTRELAY
+  case KNIGHTRELAY_VARIANT:
+      return CHESS_VARIANT;
+#endif
+#ifdef RELAY
+  case RELAY_VARIANT:
+      return CHESS_VARIANT;
+#endif
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #ifdef SLIPPEDGRID
   case SLIPPEDGRID_VARIANT:
       return GRID_VARIANT;
@@ -781,3 +1099,5 @@ inline Variant main_variant(Variant v) {
 }
 
 #endif // #ifndef TYPES_H_INCLUDED
+
+#include "tune.h" // Global visibility to tuning setup

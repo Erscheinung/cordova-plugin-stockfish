@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -41,7 +45,11 @@ constexpr int CounterMovePruneThreshold = 0;
 
 struct Stack {
   Move* pv;
+<<<<<<< HEAD
   PieceToHistory* contHistory;
+=======
+  PieceToHistory* continuationHistory;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   int ply;
   Move currentMove;
   Move excludedMove;
@@ -49,6 +57,8 @@ struct Stack {
   Value staticEval;
   int statScore;
   int moveCount;
+  bool inCheck;
+  bool ttPv;
 };
 
 
@@ -69,7 +79,12 @@ struct RootMove {
   Value score = -VALUE_INFINITE;
   Value previousScore = -VALUE_INFINITE;
   int selDepth = 0;
+<<<<<<< HEAD
   int tbRank;
+=======
+  int tbRank = 0;
+  int bestMoveCount = 0;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   Value tbScore;
   std::vector<Move> pv;
 };
@@ -89,7 +104,11 @@ struct LimitsType {
   }
 
   bool use_time_management() const {
+<<<<<<< HEAD
     return !(mate | movetime | depth | nodes | perft | infinite);
+=======
+    return time[WHITE] || time[BLACK];
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   }
 
   std::vector<Move> searchmoves;

@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,7 +25,9 @@
 #include <algorithm>
 #include <cassert>
 #include <ostream>
+#include <sstream>
 
+#include "evaluate.h"
 #include "misc.h"
 #include "search.h"
 #include "thread.h"
@@ -37,11 +43,20 @@ namespace UCI {
 
 /// 'On change' actions, triggered by an option's value change
 void on_clear_hash(const Option&) { Search::clear(); }
-void on_hash_size(const Option& o) { TT.resize(o); }
+void on_hash_size(const Option& o) { TT.resize(size_t(o)); }
 void on_logger(const Option& o) { start_logger(o); }
+<<<<<<< HEAD
 void on_threads(const Option& o) { Threads.set(o); }
 void on_tb_path(const Option& o) { Tablebases::init(UCI::variant_from_name(Options["UCI_Variant"]), o); }
+=======
+void on_threads(const Option& o) { Threads.set(size_t(o)); }
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
+void on_tb_path(const Option& o) { Tablebases::init(UCI::variant_from_name(Options["UCI_Variant"]), o); }
+#ifdef USE_NNUE
+void on_use_NNUE(const Option& ) { Eval::init_NNUE(); }
+void on_eval_file(const Option& ) { Eval::init_NNUE(); }
+#endif
 
 /// Our case insensitive less() function as required by UCI protocol
 bool CaseInsensitiveLess::operator() (const string& s1, const string& s2) const {
@@ -51,33 +66,57 @@ bool CaseInsensitiveLess::operator() (const string& s1, const string& s2) const 
 }
 
 
-/// init() initializes the UCI options to their hard-coded default values
+/// UCI::init() initializes the UCI options to their hard-coded default values
 
 void init(OptionsMap& o) {
 
+<<<<<<< HEAD
   // at most 2^32 clusters.
   constexpr int MaxHashMB = Is64Bit ? 131072 : 2048;
 
   o["Debug Log File"]        << Option("", on_logger);
   o["Contempt"]              << Option(21, -100, 100);
   o["Analysis Contempt"]     << Option("Both var Off var White var Black var Both", "Both");
+=======
+  constexpr int MaxHashMB = Is64Bit ? 33554432 : 2048;
+
+  o["Debug Log File"]        << Option("", on_logger);
+  o["Contempt"]              << Option(24, -100, 100);
+  o["Analysis Contempt"]     << Option("Both", {"Both", "Off", "White", "Black"});
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   o["Threads"]               << Option(1, 1, 512, on_threads);
   o["Hash"]                  << Option(16, 1, MaxHashMB, on_hash_size);
   o["Clear Hash"]            << Option(on_clear_hash);
   o["Ponder"]                << Option(false);
   o["MultiPV"]               << Option(1, 1, 500);
+<<<<<<< HEAD
   o["Skill Level"]           << Option(20, 0, 20);
   o["Move Overhead"]         << Option(30, 0, 5000);
   o["Minimum Thinking Time"] << Option(20, 0, 5000);
   o["Slow Mover"]            << Option(84, 10, 1000);
+=======
+  o["Skill Level"]           << Option(20, -20, 20);
+  o["Move Overhead"]         << Option(10, 0, 5000);
+  o["Slow Mover"]            << Option(100, 10, 1000);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   o["nodestime"]             << Option(0, 0, 10000);
   o["UCI_Chess960"]          << Option(false);
   o["UCI_Variant"]           << Option(variants.front().c_str(), variants);
   o["UCI_AnalyseMode"]       << Option(false);
+<<<<<<< HEAD
+=======
+  o["UCI_LimitStrength"]     << Option(false);
+  o["UCI_Elo"]               << Option(1350, 0, 3000);
+  o["UCI_ShowWDL"]           << Option(false);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   o["SyzygyPath"]            << Option("<empty>", on_tb_path);
   o["SyzygyProbeDepth"]      << Option(1, 1, 100);
   o["Syzygy50MoveRule"]      << Option(true);
-  o["SyzygyProbeLimit"]      << Option(6, 0, 6);
+  o["SyzygyProbeLimit"]      << Option(7, 0, 7);
+#ifdef USE_NNUE
+  o["Use NNUE"]              << Option(true, on_use_NNUE);
+  o["EvalFile"]              << Option(EvalFileDefaultName, on_eval_file);
+#endif
 }
 
 
@@ -117,7 +156,7 @@ std::ostream& operator<<(std::ostream& os, const OptionsMap& om) {
 Option::Option(const char* v, OnChange f) : type("string"), min(0), max(0), on_change(f)
 { defaultValue = currentValue = v; }
 
-Option::Option(const char* v, const std::vector<std::string>& variants, OnChange f) : type("combo"), min(0), max(0), comboValues(variants), on_change(f)
+Option::Option(const char* v, const std::vector<std::string>& values, OnChange f) : type("combo"), min(0), max(0), comboValues(values), on_change(f)
 { defaultValue = currentValue = v; }
 
 Option::Option(bool v, OnChange f) : type("check"), min(0), max(0), on_change(f)
@@ -129,9 +168,12 @@ Option::Option(OnChange f) : type("button"), min(0), max(0), on_change(f)
 Option::Option(double v, int minv, int maxv, OnChange f) : type("spin"), min(minv), max(maxv), on_change(f)
 { defaultValue = currentValue = std::to_string(v); }
 
+<<<<<<< HEAD
 Option::Option(const char* v, const char* cur, OnChange f) : type("combo"), min(0), max(0), on_change(f)
 { defaultValue = v; currentValue = cur; }
 
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 Option::operator double() const {
   assert(type == "check" || type == "spin");
   return (type == "spin" ? stof(currentValue) : currentValue == "true");
@@ -142,10 +184,17 @@ Option::operator std::string() const {
   return currentValue;
 }
 
+<<<<<<< HEAD
 bool Option::operator==(const char* s) {
   assert(type == "combo");
   return    !CaseInsensitiveLess()(currentValue, s)
          && !CaseInsensitiveLess()(s, currentValue);
+=======
+bool Option::operator==(const char* s) const {
+  assert(type == "combo");
+  return   !CaseInsensitiveLess()(currentValue, s)
+        && !CaseInsensitiveLess()(s, currentValue);
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 }
 
 
@@ -161,8 +210,8 @@ void Option::operator<<(const Option& o) {
 
 
 /// operator=() updates currentValue and triggers on_change() action. It's up to
-/// the GUI to check for option's limits, but we could receive the new value from
-/// the user by console window, so let's check the bounds anyway.
+/// the GUI to check for option's limits, but we could receive the new value
+/// from the user by console window, so let's check the bounds anyway.
 
 Option& Option::operator=(const string& v) {
 
@@ -170,9 +219,25 @@ Option& Option::operator=(const string& v) {
 
   if (   (type != "button" && v.empty())
       || (type == "check" && v != "true" && v != "false")
+<<<<<<< HEAD
       || (type == "combo" && (std::find(comboValues.begin(), comboValues.end(), v) == comboValues.end()))
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
       || (type == "spin" && (stof(v) < min || stof(v) > max)))
       return *this;
+
+  if (type == "combo")
+  {
+      OptionsMap comboMap; // To have case insensitive compare
+      string token;
+      std::istringstream ss(defaultValue);
+      while (ss >> token)
+          comboMap[token] << Option();
+      for (auto &value : comboValues)
+          comboMap[value] << Option();
+      if (!comboMap.count(v) || v == "var")
+          return *this;
+  }
 
   if (type != "button")
       currentValue = v;

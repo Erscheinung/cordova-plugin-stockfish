@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,7 +40,7 @@
 #include "pawns.h"
 #include "position.h"
 #include "search.h"
-#include "thread_win32.h"
+#include "thread_win32_osx.h"
 
 
 /// Thread class keeps together all the thread-related stuff. We use
@@ -46,12 +50,21 @@
 
 class Thread {
 
+<<<<<<< HEAD
   Mutex mutex;
   ConditionVariable cv;
   size_t idx;
   bool exit = false, searching = true; // Set before starting std::thread
 #ifdef _WIN32
   std::thread stdThread;
+=======
+  std::mutex mutex;
+  std::condition_variable cv;
+  size_t idx;
+  bool exit = false, searching = true; // Set before starting std::thread
+#ifdef _WIN32
+  NativeThread stdThread;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 #else
   pthread_t nativeThread;
 #endif
@@ -67,19 +80,34 @@ public:
 
   Pawns::Table pawnsTable;
   Material::Table materialTable;
+<<<<<<< HEAD
   Endgames endgames;
   size_t pvIdx, pvLast;
   int selDepth, nmpMinPly;
   Color nmpColor;
   std::atomic<uint64_t> nodes, tbHits;
+=======
+  size_t pvIdx, pvLast;
+  uint64_t ttHitAverage;
+  int selDepth, nmpMinPly;
+  Color nmpColor;
+  std::atomic<uint64_t> nodes, tbHits, bestMoveChanges;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Position rootPos;
+  StateInfo rootState;
   Search::RootMoves rootMoves;
   Depth rootDepth, completedDepth;
   CounterMoveHistory counterMoves;
   ButterflyHistory mainHistory;
+<<<<<<< HEAD
   CapturePieceToHistory captureHistory;
   ContinuationHistory contHistory;
+=======
+  LowPlyHistory lowPlyHistory;
+  CapturePieceToHistory captureHistory;
+  ContinuationHistory continuationHistory[2][2];
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
   Score contempt;
 };
 
@@ -93,9 +121,18 @@ struct MainThread : public Thread {
   void search() override;
   void check_time();
 
+<<<<<<< HEAD
   double bestMoveChanges, previousTimeReduction;
   Value previousScore;
   int callsCnt;
+=======
+  double previousTimeReduction;
+  Value bestPreviousScore;
+  Value iterValue[4];
+  int callsCnt;
+  bool stopOnPonderhit;
+  std::atomic_bool ponder;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 };
 
 
@@ -108,12 +145,24 @@ struct ThreadPool : public std::vector<Thread*> {
   void start_thinking(Position&, StateListPtr&, const Search::LimitsType&, bool = false);
   void clear();
   void set(size_t);
+<<<<<<< HEAD
 
   MainThread* main()        const { return static_cast<MainThread*>(front()); }
   uint64_t nodes_searched() const { return accumulate(&Thread::nodes); }
   uint64_t tb_hits()        const { return accumulate(&Thread::tbHits); }
 
   std::atomic_bool stop, ponder, stopOnPonderhit;
+=======
+
+  MainThread* main()        const { return static_cast<MainThread*>(front()); }
+  uint64_t nodes_searched() const { return accumulate(&Thread::nodes); }
+  uint64_t tb_hits()        const { return accumulate(&Thread::tbHits); }
+  Thread* get_best_thread() const;
+  void start_searching();
+  void wait_for_search_finished() const;
+
+  std::atomic_bool stop, increaseDepth;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 private:
   StateListPtr setupStates;

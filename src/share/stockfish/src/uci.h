@@ -1,8 +1,12 @@
 /*
   Stockfish, a UCI chess playing engine derived from Glaurung 2.1
+<<<<<<< HEAD
   Copyright (C) 2004-2008 Tord Romstad (Glaurung author)
   Copyright (C) 2008-2015 Marco Costalba, Joona Kiiski, Tord Romstad
   Copyright (C) 2015-2018 Marco Costalba, Joona Kiiski, Gary Linscott, Tord Romstad
+=======
+  Copyright (C) 2004-2020 The Stockfish developers (see AUTHORS file)
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Stockfish is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -52,13 +56,20 @@ public:
   Option(const char* v, OnChange = nullptr);
   Option(const char* v, const std::vector<std::string>& variants, OnChange = nullptr);
   Option(double v, int minv, int maxv, OnChange = nullptr);
+<<<<<<< HEAD
   Option(const char* v, const char *cur, OnChange = nullptr);
+=======
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
   Option& operator=(const std::string&);
   void operator<<(const Option&);
   operator double() const;
   operator std::string() const;
+<<<<<<< HEAD
   bool operator==(const char*);
+=======
+  bool operator==(const char*) const;
+>>>>>>> 589074cdd6ee02f29fe107f5db82561fbe9e30c1
 
 private:
   friend std::ostream& operator<<(std::ostream&, const OptionsMap&);
@@ -76,6 +87,7 @@ std::string value(Value v);
 std::string square(Square s);
 std::string move(Move m, bool chess960);
 std::string pv(const Position& pos, Depth depth, Value alpha, Value beta);
+std::string wdl(Value v, int ply);
 Move to_move(const Position& pos, std::string& str);
 Variant variant_from_name(const std::string& str);
 
